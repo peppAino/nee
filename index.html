@@ -11,11 +11,20 @@
   <div id="feed"></div>
 
   <script>
-    const backendUrl = 'https://2fccaaab-535f-46de-a18d-e52951530af9-00-3az03lfc86lyy.spock.replit.dev:8080/';
+    const backendUrl = 'https://nee-backend.erpeppe1.repl.co/feed';
 
     fetch(backendUrl)
-      .then(response => response.json())
-      .then(data => {
+      .then(response => {
+        // Debug: controlla lo stato della risposta
+        console.log('Stato HTTP:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.text(); // Prima vediamo il testo grezzo
+      })
+      .then(text => {
+        console.log('Risposta grezza:', text); // Debug: logga il testo
+        const data = JSON.parse(text); // Prova a parsare
         const feed = document.getElementById('feed');
         if (data.error) {
           feed.innerHTML = `<p>${data.error}</p>`;
@@ -35,7 +44,7 @@
       })
       .catch(error => {
         console.error('Errore:', error);
-        feed.innerHTML = '<p>Errore nel caricamento delle notizie</p>';
+        document.getElementById('feed').innerHTML = '<p>Errore nel caricamento delle notizie: ' + error.message + '</p>';
       });
   </script>
 </body>
