@@ -2,14 +2,30 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Nee</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nee - Notizie che contano</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Nee - Notizie che contano</h1>
-  <div id="feed">
-    <div class="post">Notizia 1 - 24/02/2025</div>
-    <div class="post">Notizia 2 - 23/02/2025</div>
-  </div>
+  <h1>Nee</h1>
+  <div id="feed"></div>
+
+  <script>
+    // Sostituisci con l'URL del tuo Replit una volta deployato
+    const backendUrl = 'https://nee-backend.tuoutente.repl.co/feed';
+
+    fetch(backendUrl)
+      .then(response => response.json())
+      .then(data => {
+        const feed = document.getElementById('feed');
+        data.forEach(post => {
+          const div = document.createElement('div');
+          div.className = 'post';
+          div.innerHTML = `<strong>${post.title}</strong> - ${post.date}`;
+          feed.appendChild(div);
+        });
+      })
+      .catch(error => console.error('Errore:', error));
+  </script>
 </body>
 </html>
