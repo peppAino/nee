@@ -3,178 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nee - Notizie in tempo reale</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      line-height: 1.6;
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #f8f8f8;
-    }
-    h1 {
-      color: #c00;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .post {
-      margin-bottom: 20px;
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background-color: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .post-title {
-      margin-top: 0;
-      font-weight: bold;
-      font-size: 1.3em;
-      color: #333;
-    }
-    .post-date {
-      color: #666;
-      font-size: 0.8em;
-      margin: 8px 0;
-    }
-    .post-summary {
-      margin-top: 10px;
-      line-height: 1.5;
-    }
-    a {
-      color: #0066cc;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    #status {
-      padding: 15px;
-      margin: 15px 0;
-      background-color: white;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .refresh-btn {
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .refresh-btn:hover {
-      background-color: #0055aa;
-    }
-  </style>
+  <title>Nee - Notizie che contano</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Nee - Notizie ANSA in tempo reale</h1>
-  
-  <div class="header">
-    <div id="status">Caricamento notizie in corso...</div>
-    <button class="refresh-btn" onclick="loadNews()">Aggiorna</button>
-  </div>
-  
+  <h1>Nee</h1>
   <div id="feed"></div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      loadNews();
-    });
-    
-    function loadNews() {
-      const statusDiv = document.getElementById('status');
-      const feedDiv = document.getElementById('feed');
-      
-      // URL del backend su Replit
-      const backendUrl = 'https://nee-backend.erpeppe1.repl.co/feed';
-      
-      // Reset dello stato e del feed
-      statusDiv.textContent = 'Connessione al server...';
-      feedDiv.innerHTML = '';
-      
-      fetch(backendUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache'
-        }
-      })
+    const backendUrl = 'https://nee-backend.glitch.me/feed'; // Nuovo URL Glitch
+
+    fetch(backendUrl, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
       .then(response => {
-        console.log('Stato risposta:', response.status);
+        console.log('Stato:', response.status);
+        console.log('Headers:', [...response.headers]);
         if (!response.ok) {
           throw new Error(`Errore HTTP: ${response.status}`);
         }
-        return response.json();
+        return response.text();
       })
-      .then(data => {
-        console.log('Dati ricevuti:', data);
-        
-        if (!data || data.error) {
-          statusDiv.textContent = `Errore: ${data.error || 'Dati non validi'}`;
+      .then(text => {
+        console.log('Risposta grezza:', text);
+        const data = JSON.parse(text);
+        const feed = document.getElementById('feed');
+        if (data.error) {
+          feed.innerHTML = `<p>${data.error}</p>`;
           return;
         }
-        
-        const now = new Date();
-        statusDiv.textContent = `Notizie aggiornate: ${now.toLocaleDateString()} alle ${now.toLocaleTimeString()}`;
-        
-        if (data.length === 0) {
-          feedDiv.innerHTML = '<p>Nessuna notizia disponibile al momento.</p>';
-          return;
-        }
-        
         data.forEach(post => {
-          const postDiv = document.createElement('div');
-          postDiv.className = 'post';
-          
-          const title = document.createElement('div');
-          title.className = 'post-title';
-          title.textContent = post.title;
-          
-          const date = document.createElement('div');
-          date.className = 'post-date';
-          date.textContent = post.date;
-          
-          const summary = document.createElement('div');
-          summary.className = 'post-summary';
-          summary.textContent = post.summary;
-          
-          const link = document.createElement('a');
-          link.href = post.link;
-          link.textContent = 'Leggi l\'articolo completo';
-          link.target = '_blank';
-          
-          postDiv.appendChild(title);
-          postDiv.appendChild(date);
-          postDiv.appendChild(summary);
-          postDiv.appendChild(link);
-          
-          feedDiv.appendChild(postDiv);
+          const div = document.createElement('div');
+          div.className = 'post';
+          div.innerHTML = `
+            <strong>${post.title}</strong><br>
+            <a href="${post.link}" target="_blank">Leggi tutto</a><br>
+            <small>${post.summary}</small><br>
+            <small>${post.date}</small>
+          `;
+          feed.appendChild(div);
         });
       })
       .catch(error => {
-        console.error('Errore di connessione:', error);
-        statusDiv.textContent = 'Impossibile caricare le notizie';
-        feedDiv.innerHTML = `
-          <p style="color: red; text-align: center; padding: 20px;">
-            Si è verificato un errore durante il caricamento delle notizie: ${error.message}<br><br>
-            Verifica che il server sia in esecuzione e riprova più tardi.
-          </p>
-        `;
+        console.error('Errore:', error);
+        document.getElementById('feed').innerHTML = '<p>Errore: ' + error.message + '</p>';
       });
-    }
   </script>
 </body>
 </html>
