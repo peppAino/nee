@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nee leggi le Notizie</title>
+  <title>Nee - Notizie che contano</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,8 +11,7 @@
   <div id="feed"></div>
 
   <script>
-    // URL del tuo backend Replit
-    const backendUrl = 'https://2fccaaab-535f-46de-a18d-e52951530af9-00-3az03lfc86lyy.spock.replit.dev:8080/';
+    const backendUrl = 'https://nee-backend.erpeppe1.repl.co/feed';
 
     fetch(backendUrl)
       .then(response => response.json())
@@ -25,13 +24,18 @@
         data.forEach(post => {
           const div = document.createElement('div');
           div.className = 'post';
-          div.innerHTML = `<strong>${post.title}</strong> - ${post.date}`;
+          div.innerHTML = `
+            <strong>${post.title}</strong><br>
+            <a href="${post.link}" target="_blank">Leggi tutto</a><br>
+            <small>${post.summary}</small><br>
+            <small>${post.date}</small>
+          `;
           feed.appendChild(div);
         });
       })
       .catch(error => {
         console.error('Errore:', error);
-        document.getElementById('feed').innerHTML = '<p>Errore nel caricamento delle notizie</p>';
+        feed.innerHTML = '<p>Errore nel caricamento delle notizie</p>';
       });
   </script>
 </body>
