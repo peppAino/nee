@@ -4,48 +4,135 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nee - Notizie che contano</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #c00;
+      text-align: center;
+    }
+    .post {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .post-title {
+      margin-top: 0;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    .post-date {
+      color: #666;
+      font-size: 0.8em;
+      margin-top: 5px;
+    }
+    .post-summary {
+      margin-top: 10px;
+    }
+    a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    #status {
+      padding: 10px;
+      margin: 15px 0;
+      background-color: #f8f8f8;
+      border-radius: 5px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <h1>Nee</h1>
+  <h1>Nee - Notizie in tempo reale</h1>
+  <div id="status">Caricamento notizie in corso...</div>
   <div id="feed"></div>
 
   <script>
-    const backendUrl = 'https://nee-backend.erpeppe1.repl.co/feed';
-
-    fetch(backendUrl)
-      .then(response => {
-        // Debug: controlla lo stato della risposta
-        console.log('Stato HTTP:', response.status);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+    document.addEventListener('DOMContentLoaded', function() {
+      const statusDiv = document.getElementById('status');
+      const feedDiv = document.getElementById('feed');
+      
+      // URL del tuo backend deployato
+      const backendUrl = 'https://nee-backend.erpeppe1.repl.co/feed';
+      
+      statusDiv.textContent = 'Connessione al server...';
+      
+      fetch(backendUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
         }
-        return response.text(); // Prima vediamo il testo grezzo
       })
-      .then(text => {
-        console.log('Risposta grezza:', text); // Debug: logga il testo
-        const data = JSON.parse(text); // Prova a parsare
-        const feed = document.getElementById('feed');
-        if (data.error) {
-          feed.innerHTML = `<p>${data.error}</p>`;
+      .then(response => {
+        console.log('Stato risposta:', response.status);
+        if (!response.ok) {
+          throw new Error(`Errore HTTP: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Dati ricevuti:', data);
+        
+        if (!data || data.error) {
+          statusDiv.textContent = `Errore: ${data.error || 'Dati non validi'}`;
           return;
         }
+        
+        statusDiv.textContent = `Notizie aggiornate: ${new Date().toLocaleString()}`;
+        
+        if (data.length === 0) {
+          feedDiv.innerHTML = '<p>Nessuna notizia disponibile al momento.</p>';
+          return;
+        }
+        
         data.forEach(post => {
-          const div = document.createElement('div');
-          div.className = 'post';
-          div.innerHTML = `
-            <strong>${post.title}</strong><br>
-            <a href="${post.link}" target="_blank">Leggi tutto</a><br>
-            <small>${post.summary}</small><br>
-            <small>${post.date}</small>
-          `;
-          feed.appendChild(div);
+          const postDiv = document.createElement('div');
+          postDiv.className = 'post';
+          
+          const title = document.createElement('div');
+          title.className = 'post-title';
+          title.textContent = post.title;
+          
+          const link = document.createElement('a');
+          link.href = post.link;
+          link.textContent = 'Leggi l\'articolo completo';
+          link.target = '_blank';
+          
+          const date = document.createElement('div');
+          date.className = 'post-date';
+          date.textContent = post.date;
+          
+          const summary = document.createElement('div');
+          summary.className = 'post-summary';
+          summary.textContent = post.summary;
+          
+          postDiv.appendChild(title);
+          postDiv.appendChild(date);
+          postDiv.appendChild(summary);
+          postDiv.appendChild(link);
+          
+          feedDiv.appendChild(postDiv);
         });
       })
       .catch(error => {
-        console.error('Errore:', error);
-        document.getElementById('feed').innerHTML = '<p>Errore nel caricamento delle notizie: ' + error.message + '</p>';
+        console.error('Errore di connessione:', error);
+        statusDiv.textContent = 'Impossibile caricare le notizie';
+        feedDiv.innerHTML = `
+          <p style="color: red;">Si è verificato un errore durante il caricamento delle notizie:</p>
+          <p>${error.message}</p>
+          <p>Verifica che il server sia in esecuzione e riprova più tardi.</p>
+        `;
       });
+    });
   </script>
 </body>
 </html>
