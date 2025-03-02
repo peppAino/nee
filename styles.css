@@ -1,0 +1,15 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+#feed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.post {
+  border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+}
