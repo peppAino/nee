@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nee - Notizie che contano</title>
+  <title>Nee - Notizie in tempo reale</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,65 +11,105 @@
       line-height: 1.6;
       max-width: 800px;
       margin: 0 auto;
+      background-color: #f8f8f8;
     }
     h1 {
       color: #c00;
       text-align: center;
+      margin-bottom: 30px;
     }
     .post {
       margin-bottom: 20px;
-      padding: 15px;
+      padding: 20px;
       border: 1px solid #ddd;
-      border-radius: 5px;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .post-title {
       margin-top: 0;
       font-weight: bold;
-      font-size: 1.2em;
+      font-size: 1.3em;
+      color: #333;
     }
     .post-date {
       color: #666;
       font-size: 0.8em;
-      margin-top: 5px;
+      margin: 8px 0;
     }
     .post-summary {
       margin-top: 10px;
+      line-height: 1.5;
     }
     a {
       color: #0066cc;
       text-decoration: none;
+      display: inline-block;
+      margin-top: 10px;
+      font-weight: bold;
     }
     a:hover {
       text-decoration: underline;
     }
     #status {
-      padding: 10px;
+      padding: 15px;
       margin: 15px 0;
-      background-color: #f8f8f8;
-      border-radius: 5px;
+      background-color: white;
+      border-radius: 8px;
       text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .refresh-btn {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .refresh-btn:hover {
+      background-color: #0055aa;
     }
   </style>
 </head>
 <body>
-  <h1>Nee - Notizie in tempo reale</h1>
-  <div id="status">Caricamento notizie in corso...</div>
+  <h1>Nee - Notizie ANSA in tempo reale</h1>
+  
+  <div class="header">
+    <div id="status">Caricamento notizie in corso...</div>
+    <button class="refresh-btn" onclick="loadNews()">Aggiorna</button>
+  </div>
+  
   <div id="feed"></div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      loadNews();
+    });
+    
+    function loadNews() {
       const statusDiv = document.getElementById('status');
       const feedDiv = document.getElementById('feed');
       
-      // URL del tuo backend deployato
+      // URL del backend su Replit
       const backendUrl = 'https://nee-backend.erpeppe1.repl.co/feed';
       
+      // Reset dello stato e del feed
       statusDiv.textContent = 'Connessione al server...';
+      feedDiv.innerHTML = '';
       
       fetch(backendUrl, {
         method: 'GET',
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
         }
       })
       .then(response => {
@@ -87,7 +127,8 @@
           return;
         }
         
-        statusDiv.textContent = `Notizie aggiornate: ${new Date().toLocaleString()}`;
+        const now = new Date();
+        statusDiv.textContent = `Notizie aggiornate: ${now.toLocaleDateString()} alle ${now.toLocaleTimeString()}`;
         
         if (data.length === 0) {
           feedDiv.innerHTML = '<p>Nessuna notizia disponibile al momento.</p>';
@@ -102,11 +143,6 @@
           title.className = 'post-title';
           title.textContent = post.title;
           
-          const link = document.createElement('a');
-          link.href = post.link;
-          link.textContent = 'Leggi l\'articolo completo';
-          link.target = '_blank';
-          
           const date = document.createElement('div');
           date.className = 'post-date';
           date.textContent = post.date;
@@ -114,6 +150,11 @@
           const summary = document.createElement('div');
           summary.className = 'post-summary';
           summary.textContent = post.summary;
+          
+          const link = document.createElement('a');
+          link.href = post.link;
+          link.textContent = 'Leggi l\'articolo completo';
+          link.target = '_blank';
           
           postDiv.appendChild(title);
           postDiv.appendChild(date);
@@ -127,12 +168,13 @@
         console.error('Errore di connessione:', error);
         statusDiv.textContent = 'Impossibile caricare le notizie';
         feedDiv.innerHTML = `
-          <p style="color: red;">Si è verificato un errore durante il caricamento delle notizie:</p>
-          <p>${error.message}</p>
-          <p>Verifica che il server sia in esecuzione e riprova più tardi.</p>
+          <p style="color: red; text-align: center; padding: 20px;">
+            Si è verificato un errore durante il caricamento delle notizie: ${error.message}<br><br>
+            Verifica che il server sia in esecuzione e riprova più tardi.
+          </p>
         `;
       });
-    });
+    }
   </script>
 </body>
 </html>
