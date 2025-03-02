@@ -11,13 +11,17 @@
   <div id="feed"></div>
 
   <script>
-    // Sostituisci con l'URL del tuo Replit una volta deployato
+    // URL del tuo backend Replit
     const backendUrl = 'https://nee-backend.erpeppe1.repl.co/feed';
 
     fetch(backendUrl)
       .then(response => response.json())
       .then(data => {
         const feed = document.getElementById('feed');
+        if (data.error) {
+          feed.innerHTML = `<p>${data.error}</p>`;
+          return;
+        }
         data.forEach(post => {
           const div = document.createElement('div');
           div.className = 'post';
@@ -25,7 +29,10 @@
           feed.appendChild(div);
         });
       })
-      .catch(error => console.error('Errore:', error));
+      .catch(error => {
+        console.error('Errore:', error);
+        document.getElementById('feed').innerHTML = '<p>Errore nel caricamento delle notizie</p>';
+      });
   </script>
 </body>
 </html>
